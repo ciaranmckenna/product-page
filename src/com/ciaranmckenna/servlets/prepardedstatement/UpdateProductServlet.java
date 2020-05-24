@@ -18,8 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet implementation class CreateProductServlet
  */
-@WebServlet("/ProductServlet")
-public class CreateProductServlet extends HttpServlet {
+@WebServlet("/UpdateProductServlet")
+public class UpdateProductServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection connection;
 	private PreparedStatement prepareStatement;
@@ -27,10 +27,10 @@ public class CreateProductServlet extends HttpServlet {
     public void init(ServletConfig config) {
     	try {
     		ServletContext context = config.getServletContext();
-    		Class.forName("com.mysql.jdbc.Driver");
+    		Class.forName("com.mysql.cj.jdbc.Driver");
     		connection = DriverManager.getConnection(context.getInitParameter("dbUrl"),
     				context.getInitParameter("dbUser"), context.getInitParameter("dbPassword"));
-    		prepareStatement = connection.prepareStatement("insert into product values(?,?,?,?)");
+    		prepareStatement = connection.prepareStatement("update product set price=? where id=?");
     	}catch (ClassNotFoundException e) {
     		e.printStackTrace();
     	}catch(SQLException e) {
@@ -38,26 +38,23 @@ public class CreateProductServlet extends HttpServlet {
     	}
     }
     
+    
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 			int id = Integer.parseInt(request.getParameter("id"));
-			String name = request.getParameter("name");
-			String description = request.getParameter("description");
 			int price = Integer.parseInt(request.getParameter("price"));
 	
 			try {
-				prepareStatement.setInt(1, id);
-				prepareStatement.setString(2, name);
-				prepareStatement.setString(3, description);
-				prepareStatement.setInt(4, price);
+				prepareStatement.setInt(1, price);
+				prepareStatement.setInt(2, id);
 				
 				int result = prepareStatement.executeUpdate();
 				
 				response.setContentType("text/html");
 				PrintWriter out = response.getWriter();
-				out.print("<b>" + result + " Product(s) Created</b>");
+				out.print("<b>" + result + " Product(s) Updated</b>");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}	
